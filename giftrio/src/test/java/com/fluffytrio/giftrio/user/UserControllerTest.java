@@ -39,12 +39,14 @@ public class UserControllerTest {
     @Test
     public void addUser() throws Exception {
         //given
+        String role = "USER";
         String email = "email@gmail.com";
         String userName = "userName";
         String password = "password";
 
         UserRequestDto requestDto = UserRequestDto
                 .builder()
+                .role(Role.valueOf(role))
                 .email(email)
                 .userName(userName)
                 .password(password)
@@ -58,6 +60,7 @@ public class UserControllerTest {
         //then
         assertAll(
                 () -> assertThat(responseEntity.getStatusCode()).isEqualTo(HttpStatus.OK),
+                () -> assertThat(responseEntity.getBody().getRole()).isEqualTo(Role.USER),
                 () -> assertThat(responseEntity.getBody().getEmail()).isEqualTo(email)
         );
     }
