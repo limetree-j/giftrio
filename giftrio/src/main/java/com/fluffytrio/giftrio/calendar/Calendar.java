@@ -50,6 +50,7 @@ public class Calendar {
     private String title;
     private String detail;
     private String backgroundImg;
+    private String password;
 
     @Column(nullable = false, columnDefinition = "boolean default false")
     private boolean isDelete;
@@ -67,5 +68,9 @@ public class Calendar {
         for (Advent advent : adventList) {
             advent.delete();
         }
+    }
+
+    public void changePassword(String password) {
+        this.password = password;
     }
 }

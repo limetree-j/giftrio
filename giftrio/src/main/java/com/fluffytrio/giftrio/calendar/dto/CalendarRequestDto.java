@@ -26,6 +26,7 @@ public class CalendarRequestDto {
     private String title;
     private String detail;
     private String backgroundImg;
+    private String password;
 
     public Calendar toEntity() {
         return Calendar.builder()
@@ -37,6 +38,7 @@ public class CalendarRequestDto {
                 .title(title)
                 .detail(detail)
                 .backgroundImg(backgroundImg)
+                .password(password)
                 .build();
     }
 }

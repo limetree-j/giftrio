@@ -4,8 +4,8 @@ import com.fluffytrio.giftrio.calendar.dto.CalendarRequestDto;
 import lombok.RequiredArgsConstructor;
 import org.springframework.web.bind.annotation.*;
 
+import java.security.NoSuchAlgorithmException;
 import java.util.List;
-import java.util.Optional;
 
 @RequiredArgsConstructor
 @RestController
@@ -19,7 +19,7 @@ public class CalendarController {
     }
 
     @GetMapping("/{calendarId}")
-    public Optional<Calendar> getCalendar(@PathVariable Long calendarId) {
+    public Calendar getCalendar(@PathVariable Long calendarId) {
         return calendarService.getCalendar(calendarId);
     }
 
@@ -36,5 +36,10 @@ public class CalendarController {
     @DeleteMapping("/{calendarId}")
     public boolean deleteCalendar(@PathVariable Long calendarId) {
         return calendarService.deleteCalendar(calendarId);
+    }
+
+    @PutMapping("/{calendarId}/password")
+    public Calendar updatePassword(@PathVariable Long calendarId, @RequestBody CalendarRequestDto calendarRequestDto) throws NoSuchAlgorithmException {
+        return calendarService.updatePassword(calendarRequestDto.toEntity());
     }
 }

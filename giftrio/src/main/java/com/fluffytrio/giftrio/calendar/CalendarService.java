@@ -1,12 +1,13 @@
 package com.fluffytrio.giftrio.calendar;
 
 import com.fluffytrio.giftrio.calendar.dto.CalendarRequestDto;
+import com.fluffytrio.giftrio.utils.encryption.PasswordEncoder;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 
 import javax.transaction.Transactional;
+import java.security.NoSuchAlgorithmException;
 import java.util.List;
-import java.util.Optional;
 
 @RequiredArgsConstructor
 @Service
@@ -18,8 +19,9 @@ public class CalendarService {
         return calendarRepository.save(calendarRequestDto.toEntity());
     }
 
-    public Optional<Calendar> getCalendar(Long id) {
-        return calendarRepository.findById(id);
+    public Calendar getCalendar(Long id) {
+        return calendarRepository.findById(id)
+                .orElseThrow(() -> new IllegalArgumentException("존재하지 않는 캘린더 입니다."));
     }
 
     public List<Calendar> getCalendars() {
@@ -28,25 +30,28 @@ public class CalendarService {
 
     @Transactional
     public Calendar updateCalendar(Calendar update) {
-        Optional<Calendar> findCalendar = calendarRepository.findById(update.getId());
-        Calendar calendar = null;
-        if (findCalendar.get() == null) {
-            throw new IllegalArgumentException("ID값이 없습니다.");
-        } else {
-            calendar = findCalendar.get();
-            return calendarRepository.save(update);
-        }
+        this.getCalendar(update.getId());
+        return calendarRepository.save(update);
     }
 
     @Transactional
     public boolean deleteCalendar(Long id) {
-        Optional<Calendar> findCalendar = calendarRepository.findById(id);
-        if (findCalendar.get() == null) {
-            throw new IllegalArgumentException("ID값이 없습니다.");
-        } else {
-            Calendar calendar = findCalendar.get();
-            calendar.delete();
-            return calendarRepository.save(calendar).isDelete();
+        Calendar calendar = this.getCalendar(id);
+        calendar.delete();
+        return calendarRepository.save(calendar).isDelete();
+    }
+
+    @Transactional
+    public Calendar updatePassword(Calendar updateCalendar) throws NoSuchAlgorithmException {
+        String password = updateCalendar.getPassword();
+        if (password == null && password == "") {
+            throw new IllegalArgumentException("잘못된 값을 입력하였습니다.");
         }
+        PasswordEncoder passwordEncoder = new PasswordEncoder();
+        password = passwordEncoder.encode(password);
+
+        Calendar calendar = this.getCalendar(updateCalendar.getId());
+        calendar.changePassword(password);
+        return calendarRepository.save(calendar);
     }
 }

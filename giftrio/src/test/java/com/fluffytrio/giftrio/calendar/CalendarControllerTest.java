@@ -172,4 +172,37 @@ public class CalendarControllerTest {
         //then
         assertThat(calendar.get().isDelete()).isTrue();
     }
+
+    @Test
+    public void updatePasswordTest() throws Exception {
+        //given
+        addCalendarTest();
+        Optional<User> user = userRepository.findById(1L);
+        Optional<Settings> settingId = settingsRepository.findById(1L);
+
+        LocalDate startDate = LocalDate.of(2022, 05, 01);
+        LocalDate endDate = LocalDate.of(2022, 05, 31);
+
+        CalendarRequestDto calendarDto = CalendarRequestDto.builder()
+                .id(1L)
+                .userId(user.get())
+                .settingId(settingId.get())
+                .title("title")
+                .detail("detail")
+                .startDate(startDate)
+                .endDate(endDate)
+                .backgroundImg("test")
+                .password("password")
+                .build();
+
+        //when
+        String url = "http://localhost:" + port + CALENDAR_URL + "/1/password";
+        restTemplate.put(url, calendarDto, Calendar.class);
+
+        //then
+        Optional<Calendar> calendar = calendarRepository.findById(1L);
+        assertAll(
+                () -> assertThat(calendar.get().getPassword()).isNotNull()
+        );
+    }
 }
