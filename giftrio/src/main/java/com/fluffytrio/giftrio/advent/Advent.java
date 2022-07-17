@@ -39,7 +39,6 @@ public class Advent {
     private int seqNum;
     private LocalDate adventDate;
 
-    @Column(length = 128, nullable = false)
     private String text;
     private String img;
 

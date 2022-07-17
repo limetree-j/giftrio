@@ -1,12 +1,12 @@
 package com.fluffytrio.giftrio.advent;
 
-import com.fluffytrio.giftrio.advent.dto.AdventRequestDto;
-import com.fluffytrio.giftrio.calendar.Calendar;
-import com.fluffytrio.giftrio.calendar.CalendarRepository;
-import com.fluffytrio.giftrio.settings.Settings;
-import com.fluffytrio.giftrio.settings.SettingsRepository;
-import com.fluffytrio.giftrio.user.User;
-import com.fluffytrio.giftrio.user.UserRepository;
+import java.time.LocalDate;
+import java.time.Period;
+import java.util.Arrays;
+import java.util.List;
+import java.util.Objects;
+import java.util.Optional;
+
 import org.junit.After;
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -18,16 +18,16 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.test.context.junit4.SpringRunner;
 import org.springframework.transaction.annotation.Transactional;
-
-import java.time.LocalDate;
-import java.util.Arrays;
-import java.util.List;
-import java.util.Objects;
-import java.util.Optional;
-
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.jupiter.api.Assertions.assertAll;
 
+import com.fluffytrio.giftrio.advent.dto.AdventRequestDto;
+import com.fluffytrio.giftrio.calendar.Calendar;
+import com.fluffytrio.giftrio.calendar.CalendarRepository;
+import com.fluffytrio.giftrio.settings.Settings;
+import com.fluffytrio.giftrio.settings.SettingsRepository;
+import com.fluffytrio.giftrio.user.User;
+import com.fluffytrio.giftrio.user.UserRepository;
 
 @RunWith(SpringRunner.class)
 @SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.RANDOM_PORT)
@@ -65,7 +65,6 @@ public class AdventControllerTest {
     public void addAdvent() throws Exception {
         //given
         int seqNum = 1;
-        LocalDate adventDate = LocalDate.now();
         String text = "advent create test";
         String img = "http://img_url.png";
 
@@ -81,28 +80,32 @@ public class AdventControllerTest {
         Settings settings1 =  settingsRepository.findAll().get(0);
 
         // create calendar
-        calendarRepository.save(Calendar.builder().user(users1).settingId(settings1).build());
+        LocalDate startDate = LocalDate.now();
+        LocalDate endDate = startDate.plusDays(7);
+        calendarRepository.save(
+            Calendar.builder().user(users1).settingId(settings1).startDate(startDate).endDate(endDate).build()
+        );
         Calendar calendar1 = calendarRepository.findAll().get(0);
 
         AdventRequestDto adventRequestDto = AdventRequestDto.builder()
                                                 .userId(users1)
                                                 .calendarId(calendar1)
                                                 .seqNum(seqNum)
-                                                .adventDate(adventDate)
                                                 .text(text)
                                                 .img(img)
                                                 .isOpen(false)
                                                 .build();
 
         //when
-        ResponseEntity<Advent> responseEntity = restTemplate.postForEntity(getApiUrl(), adventRequestDto, Advent.class);
+        ResponseEntity<Boolean> responseEntity = restTemplate.postForEntity(getApiUrl(), adventRequestDto, Boolean.class);
 
         //then
         assertThat(responseEntity.getStatusCode()).isEqualTo(HttpStatus.OK);
+        assertThat(responseEntity.getBody()).isEqualTo(true);
 
         List<Advent> adventList = adventRepository.findAll();
         assertAll(
-            () -> assertThat(adventList.get(0).getAdventDate()).isEqualTo(adventDate),
+            () -> assertThat(adventList.get(0).getAdventDate()).isEqualTo(startDate),
             () -> assertThat(adventList.get(0).getText()).isEqualTo(text),
             () -> assertThat(adventList.get(0).getImg()).isEqualTo(img)
         );
@@ -177,4 +180,22 @@ public class AdventControllerTest {
         Optional<Advent> advent = adventRepository.findById(adventId);
         advent.ifPresent(value -> assertThat(value.isDelete()).isEqualTo(true));
     }
+
+    @Test
+    @Transactional
+    public void getAdventsByCalendarId() throws Exception {
+        //given
+        long calendarId = 17;
+
+        //when
+        ResponseEntity<Boolean> responseEntity = restTemplate.getForEntity(
+            String.format("%s/calendars/%d", getApiUrl(), calendarId),Boolean.class
+        );
+
+        //then
+        assertThat(responseEntity.getStatusCode()).isEqualTo(HttpStatus.OK);
+        assertThat(responseEntity.getBody()).isEqualTo(true);
+
+    }
+
 }
