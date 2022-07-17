@@ -28,9 +28,6 @@ public class UserControllerTest {
     @Autowired
     private UserRepository userRepository;
 
-    @Autowired
-    private ObjectMapper objectMapper;
-
     @After
     public void tearDown() throws Exception {
         //userRepository.deleteAll();
@@ -66,6 +63,45 @@ public class UserControllerTest {
     }
 
     @Test
+    public void addDuplicateUser() throws Exception {
+        //given
+        String role = "USER";
+        String email = "newemail@gmail.com";
+        String userName = "userName";
+        String password = "password";
+
+        UserRequestDto requestDto = UserRequestDto
+                .builder()
+                .role(Role.valueOf(role))
+                .email(email)
+                .userName(userName)
+                .password(password)
+                .build();
+
+        String url = "http://localhost:"+port+"/api/v1/users";
+
+        //when
+        ResponseEntity<User> responseEntity = restTemplate.postForEntity(url, requestDto, User.class);
+
+        //then
+        assertAll(
+                () -> assertThat(responseEntity.getStatusCode()).isEqualTo(HttpStatus.OK),
+                () -> assertThat(responseEntity.getBody().getRole()).isEqualTo(Role.USER),
+                () -> assertThat(responseEntity.getBody().getEmail()).isEqualTo(email)
+        );
+
+        //when
+        ResponseEntity<User> responseEntitySecond = restTemplate.postForEntity(url, requestDto, User.class);
+        System.out.println(responseEntitySecond.getHeaders().toSingleValueMap());
+
+        //then
+        assertAll(
+                () -> assertThat(responseEntitySecond.getStatusCode()).isEqualTo(HttpStatus.INTERNAL_SERVER_ERROR)
+
+        );
+    }
+
+    @Test
     public void getUser() throws Exception {
         //given
         String url = "http://localhost:"+port+"/api/v1/users/1";
@@ -77,8 +113,6 @@ public class UserControllerTest {
         String email = "email@gmail.com";
         String userName = "userName";
         String password = "password";
-
-
 
         assertAll(
                 () -> assertThat(responseEntity.getStatusCode()).isEqualTo(HttpStatus.OK),
