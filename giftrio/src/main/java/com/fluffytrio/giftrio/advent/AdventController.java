@@ -1,11 +1,12 @@
 package com.fluffytrio.giftrio.advent;
 
-import com.fluffytrio.giftrio.advent.dto.AdventRequestDto;
+import java.util.List;
+import java.util.Optional;
+
 import lombok.RequiredArgsConstructor;
 import org.springframework.web.bind.annotation.*;
 
-import java.util.List;
-import java.util.Optional;
+import com.fluffytrio.giftrio.advent.dto.AdventRequestDto;
 
 @RequiredArgsConstructor
 @RestController
@@ -38,4 +39,10 @@ public class AdventController {
     public boolean deleteAdvent(@PathVariable Long adventId){
         return adventService.deleteAdvent(adventId);
     }
+
+    @GetMapping("/calendars/{calendarId}")
+    public boolean getAdventByCalendarId(@PathVariable Long calendarId){
+        return adventService.getAdventByCalendarId(calendarId);
+    }
+
 }

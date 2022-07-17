@@ -1,18 +1,22 @@
 package com.fluffytrio.giftrio.advent;
 
-import com.fluffytrio.giftrio.advent.dto.AdventRequestDto;
+import java.util.List;
+import java.util.Optional;
+
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
-import java.util.List;
-import java.util.Optional;
+import com.fluffytrio.giftrio.advent.dto.AdventRequestDto;
+import com.fluffytrio.giftrio.calendar.Calendar;
+import com.fluffytrio.giftrio.calendar.CalendarRepository;
 
 @RequiredArgsConstructor
 @Service
 public class AdventService {
 
     private final AdventRepository adventRepository;
+    private final CalendarRepository calendarRepository;
 
     @Transactional
     public Advent addAdvent(AdventRequestDto adventRequestDto){
@@ -49,5 +53,14 @@ public class AdventService {
             return adventRepository.save(advent.get()).isDelete();
         }
         return false;
+    }
+
+    public boolean getAdventByCalendarId(Long calendarId){
+        Optional<Calendar> calendar = calendarRepository.findById(calendarId);
+        if(calendar.isEmpty()) {
+            throw new IllegalArgumentException("ID값이 없습니다.");
+        }
+        List<Advent> advents = adventRepository.findByCalendarId(calendar.get());
+        return ! advents.isEmpty();
     }
 }

@@ -1,12 +1,11 @@
 package com.fluffytrio.giftrio.advent;
 
-import com.fluffytrio.giftrio.advent.dto.AdventRequestDto;
-import com.fluffytrio.giftrio.calendar.Calendar;
-import com.fluffytrio.giftrio.calendar.CalendarRepository;
-import com.fluffytrio.giftrio.settings.Settings;
-import com.fluffytrio.giftrio.settings.SettingsRepository;
-import com.fluffytrio.giftrio.user.User;
-import com.fluffytrio.giftrio.user.UserRepository;
+import java.time.LocalDate;
+import java.util.Arrays;
+import java.util.List;
+import java.util.Objects;
+import java.util.Optional;
+
 import org.junit.After;
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -18,16 +17,16 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.test.context.junit4.SpringRunner;
 import org.springframework.transaction.annotation.Transactional;
-
-import java.time.LocalDate;
-import java.util.Arrays;
-import java.util.List;
-import java.util.Objects;
-import java.util.Optional;
-
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.jupiter.api.Assertions.assertAll;
 
+import com.fluffytrio.giftrio.advent.dto.AdventRequestDto;
+import com.fluffytrio.giftrio.calendar.Calendar;
+import com.fluffytrio.giftrio.calendar.CalendarRepository;
+import com.fluffytrio.giftrio.settings.Settings;
+import com.fluffytrio.giftrio.settings.SettingsRepository;
+import com.fluffytrio.giftrio.user.User;
+import com.fluffytrio.giftrio.user.UserRepository;
 
 @RunWith(SpringRunner.class)
 @SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.RANDOM_PORT)
@@ -177,4 +176,22 @@ public class AdventControllerTest {
         Optional<Advent> advent = adventRepository.findById(adventId);
         advent.ifPresent(value -> assertThat(value.isDelete()).isEqualTo(true));
     }
+
+    @Test
+    @Transactional
+    public void getAdventsByCalendarId() throws Exception {
+        //given
+        long calendarId = 17;
+
+        //when
+        ResponseEntity<Boolean> responseEntity = restTemplate.getForEntity(
+            String.format("%s/calendars/%d", getApiUrl(), calendarId),Boolean.class
+        );
+
+        //then
+        assertThat(responseEntity.getStatusCode()).isEqualTo(HttpStatus.OK);
+        assertThat(responseEntity.getBody()).isEqualTo(true);
+
+    }
+
 }
